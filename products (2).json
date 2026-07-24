@@ -1,0 +1,62 @@
+[
+  {
+    "id": "p1",
+    "nome": "Caneca Personalizada",
+    "descricao": "Caneca de cerâmica 325ml com estampa personalizada, à sua escolha.",
+    "categoria": "Canecas",
+    "imagem": "",
+    "preco": 35,
+    "unidade": "un",
+    "ativo": true
+  },
+  {
+    "id": "p2",
+    "nome": "Almofada Decorativa Sob Medida",
+    "descricao": "Almofada 40x40cm com enchimento incluso, tecido e estampa à escolha.",
+    "categoria": "Casa",
+    "imagem": "",
+    "preco": 68,
+    "unidade": "un",
+    "ativo": true
+  },
+  {
+    "id": "p3",
+    "nome": "Convite Digital Personalizado",
+    "descricao": "Arte digital de convite para eventos, entregue em PDF de alta resolução.",
+    "categoria": "Papelaria",
+    "imagem": "",
+    "preco": 45,
+    "unidade": "un",
+    "ativo": true
+  },
+  {
+    "id": "p4",
+    "nome": "Quadro Decorativo A3",
+    "descricao": "Impressão em papel fotográfico com moldura, pronta para pendurar.",
+    "categoria": "Casa",
+    "imagem": "",
+    "preco": 89,
+    "unidade": "un",
+    "ativo": true
+  },
+  {
+    "id": "p5",
+    "nome": "Camiseta Estampada",
+    "descricao": "Camiseta 100% algodão com estampa personalizada, tamanhos P ao GG.",
+    "categoria": "Vestuário",
+    "imagem": "",
+    "preco": 55,
+    "unidade": "un",
+    "ativo": true
+  },
+  {
+    "id": "p6",
+    "nome": "Kit Lembrancinha de Festa",
+    "descricao": "Kit com 10 unidades personalizadas para festas e eventos.",
+    "categoria": "Festas",
+    "imagem": "",
+    "preco": 120,
+    "unidade": "kit",
+    "ativo": true
+  }
+]
