@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Produtos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F6F3; --paper:#FFFFFF; --ink:#16323F; --ink-soft:#2E5361;
+    --accent:#C98A3B; --accent-dark:#A96F27; --sage:#5B7B6B;
+    --line:#DADFDA; --text:#232323; --text-muted:#656F6B; --danger:#B5484B;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'IBM Plex Sans', sans-serif;}
+  h1,h2,h3{font-family:'Fraunces', serif; color:var(--ink); margin:0;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:1000px; margin:0 auto; padding:32px 24px 80px;}
+  button{font-family:inherit; cursor:pointer;}
+  .hidden{display:none !important;}
+
+  /* login gate */
+  #gate{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--ink);}
+  .gate-box{background:var(--paper); padding:36px; border-radius:var(--radius); width:100%; max-width:340px; text-align:center;}
+  .gate-box h2{margin-bottom:6px;}
+  .gate-box p{color:var(--text-muted); font-size:0.85rem; margin-bottom:18px;}
+  .gate-box input{width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:8px; margin-bottom:12px; font-size:0.95rem;}
+  .gate-box .err{color:var(--danger); font-size:0.82rem; min-height:18px;}
+
+  .btn{display:inline-flex; align-items:center; gap:6px; padding:11px 18px; border-radius:999px; border:1px solid transparent; font-weight:600; font-size:0.9rem; text-decoration:none;}
+  .btn-primary{background:var(--accent); color:#fff; width:100%; justify-content:center;}
+  .btn-primary:hover{background:var(--accent-dark);}
+  .btn-ink{background:var(--ink); color:#fff;}
+  .btn-ink:hover{background:var(--ink-soft);}
+  .btn-ghost{background:transparent; border-color:var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .btn-danger{background:transparent; border-color:var(--danger); color:var(--danger); font-size:0.78rem; padding:6px 12px;}
+
+  header.top{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:12px;}
+  header.top p{color:var(--text-muted); font-size:0.85rem; margin:4px 0 0;}
+
+  .banner{
+    background:#FBF2E4; border:1px solid #EFD9AE; color:#7A5416; border-radius:var(--radius);
+    padding:14px 16px; font-size:0.85rem; margin:20px 0 28px; line-height:1.5;
+  }
+  .banner b{display:block; margin-bottom:2px;}
+
+  .toolbar{display:flex; justify-content:space-between; align-items:center; margin:28px 0 14px; flex-wrap:wrap; gap:10px;}
+  .toolbar h3{font-size:1.1rem;}
+
+  table{width:100%; border-collapse:collapse; background:var(--paper); border-radius:var(--radius); overflow:hidden; border:1px solid var(--line);}
+  th, td{padding:12px 14px; text-align:left; font-size:0.85rem; border-bottom:1px solid var(--line); vertical-align:middle;}
+  th{background:var(--bg); font-size:0.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted);}
+  tr:last-child td{border-bottom:none;}
+  td.num{font-family:'IBM Plex Mono', monospace;}
+  .row-actions{display:flex; gap:8px;}
+  .row-actions button{background:none; border:none; font-size:0.78rem; font-weight:600; text-decoration:underline; color:var(--ink-soft);}
+  .row-actions button.del{color:var(--danger);}
+  .badge-off{background:#F1E3E3; color:var(--danger); font-size:0.7rem; padding:2px 8px; border-radius:999px;}
+
+  /* form panel */
+  .panel{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:24px; margin-top:16px;}
+  .panel h3{margin-bottom:16px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:0.8rem; font-weight:600; color:var(--ink); margin-bottom:5px;}
+  .field small{display:block; color:var(--text-muted); font-weight:400; margin-top:3px;}
+  .field input, .field textarea, .field select{
+    width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-family:inherit; font-size:0.92rem; background:var(--bg);
+  }
+  .field textarea{resize:vertical; min-height:64px;}
+  .checkbox-row{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+  .form-actions{display:flex; gap:10px; margin-top:6px;}
+  .form-actions .btn{flex:1; justify-content:center;}
+
+  .export-box{background:var(--ink); color:#fff; border-radius:var(--radius); padding:22px; margin-top:36px;}
+  .export-box h3{color:#fff; margin-bottom:6px;}
+  .export-box p{font-size:0.85rem; color:#CBD8DC; margin:0 0 16px; line-height:1.55;}
+  .export-box .btn-primary{width:auto;}
+
+  @media(max-width:700px){
+    .grid2{grid-template-columns:1fr;}
+    table{display:block; overflow-x:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= tela de senha ================= -->
+<div id="gate">
+  <div class="gate-box">
+    <h2>Painel de produtos</h2>
+    <p>Acesso restrito ao lojista</p>
+    <input type="password" id="gate-pass" placeholder="Senha">
+    <button class="btn btn-primary" id="gate-btn">Entrar</button>
+    <div class="err" id="gate-err"></div>
+  </div>
+</div>
+
+<!-- ================= painel ================= -->
+<div class="wrap hidden" id="panel-wrap">
+  <header class="top">
+    <div>
+      <h1>Painel de produtos</h1>
+      <p>Adicione, edite ou remova produtos do catálogo.</p>
+    </div>
+    <a href="index.html" class="btn btn-ghost">Ver site</a>
+  </header>
+
+  <div class="banner">
+    <b>Como isto funciona</b>
+    Este site é simples e não usa um servidor/banco de dados — por isso, depois de editar os produtos,
+    clique em <b>"Baixar products.json"</b> no final da página e envie esse arquivo para a mesma pasta do
+    seu site (substituindo o arquivo antigo), usando o gerenciador de arquivos da sua hospedagem. Assim as
+    mudanças aparecem para todos os visitantes.
+  </div>
+
+  <div class="toolbar">
+    <h3>Produtos cadastrados</h3>
+    <button class="btn btn-ink" id="new-product-btn">+ Novo produto</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody id="product-tbody"></tbody>
+  </table>
+
+  <div class="panel hidden" id="form-panel">
+    <h3 id="form-title">Novo produto</h3>
+    <div class="grid2">
+      <div class="field">
+        <label>Nome do produto *</label>
+        <input type="text" id="f-nome" placeholder="Ex: Caneca Personalizada">
+      </div>
+      <div class="field">
+        <label>Categoria *</label>
+        <input type="text" id="f-categoria" placeholder="Ex: Canecas" list="cat-list">
+        <datalist id="cat-list"></datalist>
+      </div>
+    </div>
+    <div class="field">
+      <label>Descrição</label>
+      <textarea id="f-descricao" placeholder="Frase curta descrevendo o produto"></textarea>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>Preço (R$) *</label>
+        <input type="number" id="f-preco" min="0" step="0.01" placeholder="0,00">
+      </div>
+      <div class="field">
+        <label>Unidade</label>
+        <input type="text" id="f-unidade" placeholder="un, kg, m², kit...">
+      </div>
+    </div>
+    <div class="field">
+      <label>URL da imagem (opcional)</label>
+      <input type="text" id="f-imagem" placeholder="https://...">
+      <small>Deixe em branco para usar uma imagem de exemplo automática. Você pode subir fotos em um serviço como imgur.com e colar o link aqui.</small>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="f-ativo" checked>
+      <label for="f-ativo" style="margin:0;">Produto visível no site</label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" id="cancel-btn">Cancelar</button>
+      <button class="btn btn-ink" id="save-btn">Salvar produto</button>
+    </div>
+  </div>
+
+  <div class="export-box">
+    <h3>Publicar alterações</h3>
+    <p>Depois de terminar as edições, baixe o arquivo atualizado e envie para a sua hospedagem, substituindo o <span class="mono">products.json</span> atual (mesma pasta do <span class="mono">index.html</span>).</p>
+    <button class="btn btn-primary" id="export-btn">⬇ Baixar products.json</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Troque a senha do painel aqui. Isto é só uma trava simples
+   (não é segurança real) para evitar acesso casual — qualquer
+   pessoa que veja o código-fonte pode encontrar a senha.
+   ============================================================ */
+const ADMIN_PASSWORD = "trocar123";
+
+document.getElementById('gate-btn').onclick = checkPass;
+document.getElementById('gate-pass').addEventListener('keydown', e => { if(e.key === 'Enter') checkPass(); });
+function checkPass(){
+  const val = document.getElementById('gate-pass').value;
+  if(val === ADMIN_PASSWORD){
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('panel-wrap').classList.remove('hidden');
+    init();
+  }else{
+    document.getElementById('gate-err').textContent = 'Senha incorreta.';
+  }
+}
+
+let PRODUCTS = [];
+let editingId = null;
+
+async function init(){
+  try{
+    const res = await fetch('products.json', {cache:"no-store"});
+    PRODUCTS = res.ok ? await res.json() : [];
+  }catch(e){
+    PRODUCTS = [];
+  }
+  renderTable();
+  updateCatList();
+}
+
+function updateCatList(){
+  const dl = document.getElementById('cat-list');
+  dl.innerHTML = "";
+  [...new Set(PRODUCTS.map(p=>p.categoria).filter(Boolean))].forEach(c=>{
+    const o = document.createElement('option'); o.value = c; dl.appendChild(o);
+  });
+}
+
+function fmt(n){ return "R$ " + Number(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function renderTable(){
+  const tbody = document.getElementById('product-tbody');
+  tbody.innerHTML = "";
+  if(PRODUCTS.length === 0){
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted);">Nenhum produto cadastrado ainda.</td></tr>`;
+    return;
+  }
+  PRODUCTS.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${p.nome}</td>
+      <td>${p.categoria || '—'}</td>
+      <td class="num">${fmt(p.preco)} <span style="color:var(--text-muted); font-size:0.75rem;">/${p.unidade||'un'}</span></td>
+      <td>${p.ativo === false ? '<span class="badge-off">oculto</span>' : 'visível'}</td>
+      <td>
+        <div class="row-actions">
+          <button data-act="edit">editar</button>
+          <button data-act="del" class="del">excluir</button>
+        </div>
+      </td>`;
+    tr.querySelector('[data-act="edit"]').onclick = () => openForm(p.id);
+    tr.querySelector('[data-act="del"]').onclick = () => {
+      if(confirm(`Excluir "${p.nome}"? Esta ação não pode ser desfeita.`)){
+        PRODUCTS = PRODUCTS.filter(x => x.id !== p.id);
+        renderTable();
+      }
+    };
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('new-product-btn').onclick = () => openForm(null);
+document.getElementById('cancel-btn').onclick = closeForm;
+
+function openForm(id){
+  editingId = id;
+  const panel = document.getElementById('form-panel');
+  panel.classList.remove('hidden');
+  panel.scrollIntoView({behavior:'smooth', block:'start'});
+  document.getElementById('form-title').textContent = id ? 'Editar produto' : 'Novo produto';
+
+  const p = id ? PRODUCTS.find(x => x.id === id) : null;
+  document.getElementById('f-nome').value = p ? p.nome : '';
+  document.getElementById('f-categoria').value = p ? p.categoria : '';
+  document.getElementById('f-descricao').value = p ? p.descricao : '';
+  document.getElementById('f-preco').value = p ? p.preco : '';
+  document.getElementById('f-unidade').value = p ? p.unidade : 'un';
+  document.getElementById('f-imagem').value = p ? (p.imagem||'') : '';
+  document.getElementById('f-ativo').checked = p ? p.ativo !== false : true;
+}
+function closeForm(){
+  document.getElementById('form-panel').classList.add('hidden');
+  editingId = null;
+}
+
+document.getElementById('save-btn').onclick = () => {
+  const nome = document.getElementById('f-nome').value.trim();
+  const categoria = document.getElementById('f-categoria').value.trim();
+  const preco = parseFloat(document.getElementById('f-preco').value);
+
+  if(!nome || !categoria || isNaN(preco)){
+    alert('Preencha ao menos nome, categoria e preço.');
+    return;
+  }
+  const data = {
+    id: editingId || 'p' + Date.now(),
+    nome,
+    categoria,
+    descricao: document.getElementById('f-descricao').value.trim(),
+    preco,
+    unidade: document.getElementById('f-unidade').value.trim() || 'un',
+    imagem: document.getElementById('f-imagem').value.trim(),
+    ativo: document.getElementById('f-ativo').checked
+  };
+
+  if(editingId){
+    PRODUCTS = PRODUCTS.map(p => p.id === editingId ? data : p);
+  }else{
+    PRODUCTS.push(data);
+  }
+  renderTable();
+  updateCatList();
+  closeForm();
+};
+
+document.getElementById('export-btn').onclick = () => {
+  const blob = new Blob([JSON.stringify(PRODUCTS, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'products.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+</script>
+</body>
+</html>
