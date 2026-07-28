@@ -9,9 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F5F6F3; --paper:#FFFFFF; --ink:#16323F; --ink-soft:#2E5361;
-    --accent:#C98A3B; --accent-dark:#A96F27; --sage:#5B7B6B;
-    --line:#DADFDA; --text:#232323; --text-muted:#656F6B; --danger:#B5484B;
+    --bg:#FBF5F3; --paper:#FFFFFF; --ink:#3D2B28; --ink-soft:#5C433E;
+    --accent:#D98A4E; --accent-dark:#B86B36; --sage:#B5677D;
+    --line:#E8DAD5; --text:#2A211F; --text-muted:#7A6863; --danger:#B5484B;
     --radius:10px;
   }
   *{box-sizing:border-box;}
@@ -72,6 +72,19 @@
     width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-family:inherit; font-size:0.92rem; background:var(--bg);
   }
   .field textarea{resize:vertical; min-height:64px;}
+  .photo-field{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;}
+  .photo-preview{
+    width:160px; aspect-ratio:4/3; border-radius:8px; overflow:hidden;
+    border:1px solid var(--line); background:var(--bg); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .photo-preview img{width:100%; height:100%; object-fit:contain; display:block; background:#fff;}
+  .photo-controls{flex:1; min-width:200px;}
+  .photo-controls input[type="file"]{
+    width:100%; border:1px solid var(--line); border-radius:8px; padding:9px 10px;
+    font-family:inherit; font-size:0.85rem; background:var(--bg); margin-bottom:4px;
+  }
+  .photo-status{font-size:0.78rem; color:var(--sage); min-height:16px;}
   .checkbox-row{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
   .form-actions{display:flex; gap:10px; margin-top:6px;}
   .form-actions .btn{flex:1; justify-content:center;}
@@ -85,6 +98,55 @@
     .grid2{grid-template-columns:1fr;}
     table{display:block; overflow-x:auto;}
   }
+
+  /* ---------- tabs ---------- */
+  .tabbar{display:flex; gap:8px; margin:24px 0 6px; border-bottom:1px solid var(--line);}
+  .tabbar button{
+    background:none; border:none; padding:10px 4px; margin-right:20px; font-size:0.95rem; font-weight:600;
+    color:var(--text-muted); border-bottom:2px solid transparent; position:relative; top:1px;
+  }
+  .tabbar button.active{color:var(--ink); border-bottom-color:var(--accent);}
+  .tab-panel.hidden{display:none;}
+
+  /* ---------- busca / filtro ---------- */
+  .search-row{display:flex; gap:10px; margin:18px 0; flex-wrap:wrap;}
+  .search-row input, .search-row select{
+    border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-family:inherit; font-size:0.88rem; background:var(--paper);
+  }
+  .search-row input{flex:2; min-width:200px;}
+  .search-row select{flex:1; min-width:160px;}
+  .result-count{font-size:0.78rem; color:var(--text-muted); margin:-8px 0 10px;}
+
+  /* ---------- paginacao ---------- */
+  .pagination{display:flex; align-items:center; justify-content:center; gap:14px; margin-top:16px; font-size:0.85rem;}
+  .pagination button{background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:7px 14px; font-weight:600; color:var(--ink);}
+  .pagination button:disabled{opacity:0.4; cursor:not-allowed;}
+
+  /* ---------- galeria de fotos extras ---------- */
+  .gallery-extra{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+  .gallery-thumb{position:relative; width:74px; height:56px; border-radius:6px; overflow:hidden; border:1px solid var(--line); background:#fff;}
+  .gallery-thumb img{width:100%; height:100%; object-fit:contain;}
+  .gallery-thumb button{
+    position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%;
+    background:rgba(181,72,75,0.92); color:#fff; border:none; font-size:0.7rem; line-height:1; padding:0;
+  }
+  .gallery-add{
+    width:74px; height:56px; border-radius:6px; border:1px dashed var(--line); background:var(--bg);
+    display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:var(--text-muted); cursor:pointer;
+  }
+  .gallery-add input{display:none;}
+
+  /* ---------- editor de banners ---------- */
+  .banner-row{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px; margin-bottom:14px; display:grid; grid-template-columns:110px 1fr 1fr 1fr; gap:14px; align-items:start;
+  }
+  .banner-row .tag{
+    background:var(--bg); border-radius:8px; padding:8px 10px; font-size:0.75rem; font-weight:600; color:var(--sage); text-align:center; height:fit-content;
+  }
+  @media(max-width:800px){
+    .banner-row{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
@@ -92,6 +154,7 @@
 <!-- ================= tela de senha ================= -->
 <div id="gate">
   <div class="gate-box">
+    <img src="images/logo.png" alt="Vira Brindes" style="width:64px; height:64px; border-radius:50%; margin:0 auto 14px; display:block;">
     <h2>Painel de produtos</h2>
     <p>Acesso restrito ao lojista</p>
     <input type="password" id="gate-pass" placeholder="Senha">
@@ -107,75 +170,118 @@
       <h1>Painel de produtos</h1>
       <p>Adicione, edite ou remova produtos do catálogo.</p>
     </div>
-    <a href="index.html" class="btn btn-ghost">Ver site</a>
+    <a href="produtos.html" class="btn btn-ghost">Ver catálogo</a>
   </header>
 
   <div class="banner">
     <b>Como isto funciona</b>
-    Este site é simples e não usa um servidor/banco de dados — por isso, depois de editar os produtos,
-    clique em <b>"Baixar products.json"</b> no final da página e envie esse arquivo para a mesma pasta do
-    seu site (substituindo o arquivo antigo), usando o gerenciador de arquivos da sua hospedagem. Assim as
-    mudanças aparecem para todos os visitantes.
+    Este site é simples e não usa um servidor/banco de dados — por isso, depois de editar os produtos
+    ou os banners, baixe os arquivos atualizados no final da página e envie-os para a mesma pasta do
+    seu site (substituindo os arquivos antigos), usando o gerenciador de arquivos da sua hospedagem.
+    Assim as mudanças aparecem para todos os visitantes.
   </div>
 
-  <div class="toolbar">
-    <h3>Produtos cadastrados</h3>
-    <button class="btn btn-ink" id="new-product-btn">+ Novo produto</button>
+  <div class="tabbar">
+    <button class="tab-btn active" data-tab="produtos">Produtos</button>
+    <button class="tab-btn" data-tab="banners">Banners da home</button>
   </div>
 
-  <table>
-    <thead>
-      <tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Status</th><th></th></tr>
-    </thead>
-    <tbody id="product-tbody"></tbody>
-  </table>
+  <!-- ===== aba: produtos ===== -->
+  <div class="tab-panel" id="tab-produtos">
+    <div class="toolbar">
+      <h3>Produtos cadastrados</h3>
+      <button class="btn btn-ink" id="new-product-btn">+ Novo produto</button>
+    </div>
 
-  <div class="panel hidden" id="form-panel">
-    <h3 id="form-title">Novo produto</h3>
-    <div class="grid2">
-      <div class="field">
-        <label>Nome do produto *</label>
-        <input type="text" id="f-nome" placeholder="Ex: Caneca Personalizada">
+    <div class="search-row">
+      <input type="text" id="search-input" placeholder="Buscar por nome...">
+      <select id="filter-categoria"><option value="">Todas as categorias</option></select>
+    </div>
+    <div class="result-count" id="result-count"></div>
+
+    <table>
+      <thead>
+        <tr><th>Produto</th><th>Categoria</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody id="product-tbody"></tbody>
+    </table>
+
+    <div class="pagination" id="pagination"></div>
+
+    <div class="panel hidden" id="form-panel">
+      <h3 id="form-title">Novo produto</h3>
+      <div class="grid2">
+        <div class="field">
+          <label>Nome do produto *</label>
+          <input type="text" id="f-nome" placeholder="Ex: Caneca Personalizada">
+        </div>
+        <div class="field">
+          <label>Categoria *</label>
+          <input type="text" id="f-categoria" placeholder="Ex: Canecas" list="cat-list">
+          <datalist id="cat-list"></datalist>
+        </div>
       </div>
       <div class="field">
-        <label>Categoria *</label>
-        <input type="text" id="f-categoria" placeholder="Ex: Canecas" list="cat-list">
-        <datalist id="cat-list"></datalist>
-      </div>
-    </div>
-    <div class="field">
-      <label>Descrição</label>
-      <textarea id="f-descricao" placeholder="Frase curta descrevendo o produto"></textarea>
-    </div>
-    <div class="grid2">
-      <div class="field">
-        <label>Preço (R$) *</label>
-        <input type="number" id="f-preco" min="0" step="0.01" placeholder="0,00">
+        <label>Descrição</label>
+        <textarea id="f-descricao" placeholder="Frase curta descrevendo o produto"></textarea>
       </div>
       <div class="field">
         <label>Unidade</label>
         <input type="text" id="f-unidade" placeholder="un, kg, m², kit...">
       </div>
+      <div class="field">
+        <label>Foto principal</label>
+        <div class="photo-field">
+          <div class="photo-preview"><img id="f-imagem-preview" alt="Prévia da foto"></div>
+          <div class="photo-controls">
+            <input type="file" id="f-imagem-file" accept="image/*">
+            <div class="photo-status" id="photo-status"></div>
+            <small>Escolha uma foto do computador ou celular — ela é recortada e redimensionada automaticamente nas mesmas medidas usadas no site (proporção 4:3), então não precisa se preocupar com o tamanho da imagem original.</small>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Ou cole o link de uma imagem (opcional)</label>
+        <input type="text" id="f-imagem" placeholder="https://...">
+        <small>Só preencha se preferir usar uma foto que já está hospedada em outro site. Se você escolheu uma foto acima, pode deixar este campo em branco.</small>
+      </div>
+      <div class="field">
+        <label>Fotos extras (galeria)</label>
+        <div class="gallery-extra" id="gallery-extra"></div>
+        <small>Adicione outras fotos do mesmo produto (ângulos, cores, detalhes). O cliente vê todas ao clicar na foto no catálogo.</small>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="f-ativo" checked>
+        <label for="f-ativo" style="margin:0;">Produto visível no site</label>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" id="cancel-btn">Cancelar</button>
+        <button class="btn btn-ink" id="save-btn">Salvar produto</button>
+      </div>
     </div>
-    <div class="field">
-      <label>URL da imagem (opcional)</label>
-      <input type="text" id="f-imagem" placeholder="https://...">
-      <small>Deixe em branco para usar uma imagem de exemplo automática. Você pode subir fotos em um serviço como imgur.com e colar o link aqui.</small>
-    </div>
-    <div class="checkbox-row">
-      <input type="checkbox" id="f-ativo" checked>
-      <label for="f-ativo" style="margin:0;">Produto visível no site</label>
-    </div>
-    <div class="form-actions">
-      <button class="btn btn-ghost" id="cancel-btn">Cancelar</button>
-      <button class="btn btn-ink" id="save-btn">Salvar produto</button>
+
+    <div class="export-box">
+      <h3>Publicar alterações de produtos</h3>
+      <p>Depois de terminar as edições, baixe o arquivo atualizado e envie para a sua hospedagem, substituindo o <span class="mono">products.json</span> atual (mesma pasta do <span class="mono">index.html</span>).</p>
+      <button class="btn btn-primary" id="export-btn">⬇ Baixar products.json</button>
     </div>
   </div>
 
-  <div class="export-box">
-    <h3>Publicar alterações</h3>
-    <p>Depois de terminar as edições, baixe o arquivo atualizado e envie para a sua hospedagem, substituindo o <span class="mono">products.json</span> atual (mesma pasta do <span class="mono">index.html</span>).</p>
-    <button class="btn btn-primary" id="export-btn">⬇ Baixar products.json</button>
+  <!-- ===== aba: banners ===== -->
+  <div class="tab-panel hidden" id="tab-banners">
+    <div class="toolbar">
+      <h3>Banners da página inicial</h3>
+    </div>
+    <p style="color:var(--text-muted); font-size:0.88rem; margin:-6px 0 18px;">
+      São os 4 blocos de foto no topo da home. A foto de cada um é escolhida automaticamente
+      a partir da categoria selecionada (pega a foto do primeiro produto dessa categoria).
+    </p>
+    <div id="banner-rows"></div>
+    <div class="export-box">
+      <h3>Publicar alterações dos banners</h3>
+      <p>Baixe o arquivo e envie para a sua hospedagem, substituindo o <span class="mono">banners.json</span> atual (mesma pasta do <span class="mono">index.html</span>).</p>
+      <button class="btn btn-primary" id="export-banners-btn">⬇ Baixar banners.json</button>
+    </div>
   </div>
 </div>
 
@@ -201,7 +307,10 @@ function checkPass(){
 }
 
 let PRODUCTS = [];
+let BANNERS = [];
 let editingId = null;
+let currentPage = 1;
+const PAGE_SIZE = 50;
 
 async function init(){
   try{
@@ -210,33 +319,158 @@ async function init(){
   }catch(e){
     PRODUCTS = [];
   }
+  try{
+    const resB = await fetch('banners.json', {cache:"no-store"});
+    BANNERS = resB.ok ? await resB.json() : [];
+  }catch(e){
+    BANNERS = [];
+  }
+  if(!Array.isArray(BANNERS) || BANNERS.length === 0){
+    BANNERS = [
+      { size: "large", categoria: "", titulo: "Confira nosso catálogo", cta: "Ver produtos" },
+      { size: "a", categoria: "", titulo: "Novidades", cta: "Confira" },
+      { size: "b", categoria: "", titulo: "Mais vendidos", cta: "Confira" },
+      { size: "wide", categoria: "", titulo: "Centenas de modelos", cta: "Ver catálogo completo" },
+    ];
+  }
   renderTable();
   updateCatList();
+  renderBannerRows();
 }
+
+/* ---------- abas ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-produtos').classList.toggle('hidden', btn.dataset.tab !== 'produtos');
+    document.getElementById('tab-banners').classList.toggle('hidden', btn.dataset.tab !== 'banners');
+  };
+});
 
 function updateCatList(){
   const dl = document.getElementById('cat-list');
+  const filterSel = document.getElementById('filter-categoria');
+  const cats = [...new Set(PRODUCTS.map(p=>p.categoria).filter(Boolean))].sort();
   dl.innerHTML = "";
-  [...new Set(PRODUCTS.map(p=>p.categoria).filter(Boolean))].forEach(c=>{
+  cats.forEach(c=>{
     const o = document.createElement('option'); o.value = c; dl.appendChild(o);
+  });
+  const prevVal = filterSel.value;
+  filterSel.innerHTML = '<option value="">Todas as categorias</option>';
+  cats.forEach(c=>{
+    const o = document.createElement('option'); o.value = c; o.textContent = c; filterSel.appendChild(o);
+  });
+  filterSel.value = cats.includes(prevVal) ? prevVal : '';
+}
+
+
+/* placeholder de imagem gerado localmente, igual ao usado no index.html */
+function placeholderImg(text){
+  const initials = (text||'?').split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+    <rect width="400" height="300" fill="#16323F"/>
+    <text x="50%" y="53%" font-family="IBM Plex Sans, sans-serif" font-size="72" fill="#ffffff" fill-opacity="0.85" text-anchor="middle" dominant-baseline="middle">${initials}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
+/* redimensiona a foto escolhida para caber inteira dentro da proporção 4:3 usada nos cards do site, sem cortar nada (preenche com fundo branco) */
+const PHOTO_TARGET_W = 900, PHOTO_TARGET_H = 675;
+function resizeImageFile(file, targetW, targetH, quality){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = targetW; canvas.height = targetH;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, targetW, targetH);
+        const scale = Math.min(targetW / img.width, targetH / img.height);
+        const newW = Math.round(img.width * scale);
+        const newH = Math.round(img.height * scale);
+        const dx = (targetW - newW) / 2;
+        const dy = (targetH - newH) / 2;
+        ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, newW, newH);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => reject(new Error('Não foi possível ler essa imagem.'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Não foi possível ler esse arquivo.'));
+    reader.readAsDataURL(file);
   });
 }
 
-function fmt(n){ return "R$ " + Number(n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function updatePhotoPreview(){
+  const url = document.getElementById('f-imagem').value.trim();
+  const nome = document.getElementById('f-nome').value.trim();
+  document.getElementById('f-imagem-preview').src = url || placeholderImg(nome);
+}
+
+document.getElementById('f-imagem-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  const statusEl = document.getElementById('photo-status');
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    statusEl.textContent = 'Escolha um arquivo de imagem (jpg, png...).';
+    statusEl.style.color = 'var(--danger)';
+    return;
+  }
+  statusEl.textContent = 'Ajustando a foto...';
+  statusEl.style.color = 'var(--text-muted)';
+  try{
+    const dataUrl = await resizeImageFile(file, PHOTO_TARGET_W, PHOTO_TARGET_H, 0.85);
+    document.getElementById('f-imagem').value = dataUrl;
+    document.getElementById('f-imagem-preview').src = dataUrl;
+    statusEl.textContent = 'Foto pronta, já ajustada nas medidas do site.';
+    statusEl.style.color = 'var(--sage)';
+  }catch(err){
+    statusEl.textContent = err.message;
+    statusEl.style.color = 'var(--danger)';
+  }
+});
+
+document.getElementById('f-imagem').addEventListener('input', updatePhotoPreview);
+document.getElementById('f-nome').addEventListener('input', () => {
+  if(!document.getElementById('f-imagem').value.trim()) updatePhotoPreview();
+});
+
+document.getElementById('search-input').addEventListener('input', () => { currentPage = 1; renderTable(); });
+document.getElementById('filter-categoria').addEventListener('change', () => { currentPage = 1; renderTable(); });
+
+function getFilteredProducts(){
+  const term = document.getElementById('search-input').value.trim().toLowerCase();
+  const cat = document.getElementById('filter-categoria').value;
+  return PRODUCTS.filter(p => {
+    const matchesTerm = !term || p.nome.toLowerCase().includes(term);
+    const matchesCat = !cat || p.categoria === cat;
+    return matchesTerm && matchesCat;
+  });
+}
 
 function renderTable(){
   const tbody = document.getElementById('product-tbody');
+  const filtered = getFilteredProducts();
+  document.getElementById('result-count').textContent =
+    `${filtered.length} de ${PRODUCTS.length} produtos`;
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if(currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+
   tbody.innerHTML = "";
-  if(PRODUCTS.length === 0){
-    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted);">Nenhum produto cadastrado ainda.</td></tr>`;
-    return;
+  if(pageItems.length === 0){
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted);">Nenhum produto encontrado.</td></tr>`;
   }
-  PRODUCTS.forEach(p => {
+  pageItems.forEach(p => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${p.nome}</td>
-      <td>${p.categoria || '—'}</td>
-      <td class="num">${fmt(p.preco)} <span style="color:var(--text-muted); font-size:0.75rem;">/${p.unidade||'un'}</span></td>
+      <td>${p.categoria || '—'} <span style="color:var(--text-muted); font-size:0.75rem;">/${p.unidade||'un'}</span></td>
       <td>${p.ativo === false ? '<span class="badge-off">oculto</span>' : 'visível'}</td>
       <td>
         <div class="row-actions">
@@ -253,10 +487,52 @@ function renderTable(){
     };
     tbody.appendChild(tr);
   });
+
+  const pag = document.getElementById('pagination');
+  if(totalPages <= 1){
+    pag.innerHTML = "";
+  }else{
+    pag.innerHTML = `
+      <button id="pg-prev" ${currentPage===1?'disabled':''}>← Anterior</button>
+      <span>Página ${currentPage} de ${totalPages}</span>
+      <button id="pg-next" ${currentPage===totalPages?'disabled':''}>Próxima →</button>`;
+    document.getElementById('pg-prev').onclick = () => { currentPage--; renderTable(); };
+    document.getElementById('pg-next').onclick = () => { currentPage++; renderTable(); };
+  }
 }
 
 document.getElementById('new-product-btn').onclick = () => openForm(null);
 document.getElementById('cancel-btn').onclick = closeForm;
+
+let currentGalleryExtra = [];
+
+function renderGalleryExtra(){
+  const wrap = document.getElementById('gallery-extra');
+  wrap.innerHTML = "";
+  currentGalleryExtra.forEach((src, idx) => {
+    const div = document.createElement('div');
+    div.className = 'gallery-thumb';
+    div.innerHTML = `<img src="${src}" alt=""><button title="Remover foto">✕</button>`;
+    div.querySelector('button').onclick = () => {
+      currentGalleryExtra.splice(idx, 1);
+      renderGalleryExtra();
+    };
+    wrap.appendChild(div);
+  });
+  const addTile = document.createElement('label');
+  addTile.className = 'gallery-add';
+  addTile.innerHTML = `+ <input type="file" accept="image/*">`;
+  addTile.querySelector('input').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if(!file || !file.type.startsWith('image/')) return;
+    try{
+      const dataUrl = await resizeImageFile(file, PHOTO_TARGET_W, PHOTO_TARGET_H, 0.85);
+      currentGalleryExtra.push(dataUrl);
+      renderGalleryExtra();
+    }catch(err){ alert(err.message); }
+  });
+  wrap.appendChild(addTile);
+}
 
 function openForm(id){
   editingId = id;
@@ -269,10 +545,14 @@ function openForm(id){
   document.getElementById('f-nome').value = p ? p.nome : '';
   document.getElementById('f-categoria').value = p ? p.categoria : '';
   document.getElementById('f-descricao').value = p ? p.descricao : '';
-  document.getElementById('f-preco').value = p ? p.preco : '';
   document.getElementById('f-unidade').value = p ? p.unidade : 'un';
   document.getElementById('f-imagem').value = p ? (p.imagem||'') : '';
+  document.getElementById('f-imagem-file').value = '';
+  document.getElementById('photo-status').textContent = '';
   document.getElementById('f-ativo').checked = p ? p.ativo !== false : true;
+  currentGalleryExtra = p && Array.isArray(p.imagensExtras) ? [...p.imagensExtras] : [];
+  renderGalleryExtra();
+  updatePhotoPreview();
 }
 function closeForm(){
   document.getElementById('form-panel').classList.add('hidden');
@@ -282,10 +562,9 @@ function closeForm(){
 document.getElementById('save-btn').onclick = () => {
   const nome = document.getElementById('f-nome').value.trim();
   const categoria = document.getElementById('f-categoria').value.trim();
-  const preco = parseFloat(document.getElementById('f-preco').value);
 
-  if(!nome || !categoria || isNaN(preco)){
-    alert('Preencha ao menos nome, categoria e preço.');
+  if(!nome || !categoria){
+    alert('Preencha ao menos nome e categoria.');
     return;
   }
   const data = {
@@ -293,9 +572,9 @@ document.getElementById('save-btn').onclick = () => {
     nome,
     categoria,
     descricao: document.getElementById('f-descricao').value.trim(),
-    preco,
     unidade: document.getElementById('f-unidade').value.trim() || 'un',
     imagem: document.getElementById('f-imagem').value.trim(),
+    imagensExtras: currentGalleryExtra,
     ativo: document.getElementById('f-ativo').checked
   };
 
@@ -315,6 +594,49 @@ document.getElementById('export-btn').onclick = () => {
   const a = document.createElement('a');
   a.href = url;
   a.download = 'products.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+/* ---------- editor de banners ---------- */
+const SIZE_LABELS = { large: 'Grande\n(esquerda)', a: 'Pequeno A\n(topo dir.)', b: 'Pequeno B\n(topo dir.)', wide: 'Largo\n(embaixo)' };
+
+function renderBannerRows(){
+  const wrap = document.getElementById('banner-rows');
+  const cats = [...new Set(PRODUCTS.map(p=>p.categoria).filter(Boolean))].sort();
+  wrap.innerHTML = "";
+  BANNERS.forEach((tile, idx) => {
+    const row = document.createElement('div');
+    row.className = 'banner-row';
+    row.innerHTML = `
+      <div class="tag">${(SIZE_LABELS[tile.size]||tile.size).replace('\n','<br>')}</div>
+      <div class="field" style="margin:0;">
+        <label>Categoria (foto vem daqui)</label>
+        <select data-f="categoria"><option value="">Nenhuma / foto padrão</option>${cats.map(c=>`<option value="${c}" ${c===tile.categoria?'selected':''}>${c}</option>`).join('')}</select>
+      </div>
+      <div class="field" style="margin:0;">
+        <label>Título</label>
+        <input type="text" data-f="titulo" value="${(tile.titulo||'').replace(/"/g,'&quot;')}">
+      </div>
+      <div class="field" style="margin:0;">
+        <label>Texto do botão</label>
+        <input type="text" data-f="cta" value="${(tile.cta||'').replace(/"/g,'&quot;')}">
+      </div>`;
+    row.querySelector('[data-f="categoria"]').addEventListener('change', e => { tile.categoria = e.target.value; });
+    row.querySelector('[data-f="titulo"]').addEventListener('input', e => { tile.titulo = e.target.value; });
+    row.querySelector('[data-f="cta"]').addEventListener('input', e => { tile.cta = e.target.value; });
+    wrap.appendChild(row);
+  });
+}
+
+document.getElementById('export-banners-btn').onclick = () => {
+  const blob = new Blob([JSON.stringify(BANNERS, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'banners.json';
   document.body.appendChild(a);
   a.click();
   a.remove();

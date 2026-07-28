@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produtos — Sua Loja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  /* ---------- page header ---------- */
+  .page-head{
+    padding:40px 0 28px; border-bottom:1px solid var(--line);
+    background: radial-gradient(circle at 90% 10%, rgba(217,138,78,0.10), transparent 45%), var(--bg);
+  }
+  .page-head h1{font-size:clamp(1.7rem, 3vw, 2.3rem);}
+  .page-head p{color:var(--text-muted); margin-top:8px; max-width:56ch;}
+  .breadcrumb{font-size:0.82rem; color:var(--text-muted); margin-bottom:10px;}
+  .breadcrumb a{color:var(--ink-soft); text-decoration:none;}
+  .breadcrumb a:hover{text-decoration:underline;}
+
+  /* ---------- catalog ---------- */
+  .catalog-section{padding:40px 0 100px;}
+  .catalog-section .wrap{display:grid; grid-template-columns:1fr 300px; gap:40px; align-items:start;}
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px;}
+  .tab{
+    padding:8px 16px; border-radius:999px; border:1px solid var(--line);
+    background:var(--paper); font-size:0.85rem; font-weight:500; color:var(--text-muted);
+  }
+  .tab.active{background:var(--ink); border-color:var(--ink); color:#fff;}
+
+  .product-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:20px;}
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+  .card .thumb{aspect-ratio:4/3; width:100%; overflow:hidden; background:#fff; cursor:zoom-in;}
+  .card .thumb img{width:100%; height:100%; object-fit:contain; display:block;}
+  .card .body{padding:16px; display:flex; flex-direction:column; gap:6px; flex:1;}
+  .card .eyebrow{font-size:0.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--sage); font-weight:600;}
+  .card h3{font-size:1.02rem; line-height:1.25;}
+  .card p.desc{font-size:0.85rem; color:var(--text-muted); margin:0; flex:1;}
+  .qty-row{display:flex; align-items:center; gap:10px; margin-top:12px;}
+  .stepper{display:flex; align-items:center; border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  .stepper button{background:var(--bg); border:none; width:30px; height:30px; font-size:1rem; color:var(--ink);}
+  .stepper span{width:32px; text-align:center; font-family:'IBM Plex Mono', monospace; font-size:0.9rem;}
+  .add-btn{
+    flex:1; background:var(--ink); color:#fff; border:none; border-radius:8px;
+    padding:8px 10px; font-size:0.82rem; font-weight:600;
+  }
+  .add-btn:hover{background:var(--ink-soft);}
+
+  /* ---------- lightbox ---------- */
+  .lightbox-overlay{
+    position:fixed; inset:0; background:rgba(61,43,40,0.78); z-index:70;
+    display:flex; align-items:center; justify-content:center; padding:40px 20px;
+  }
+  .lightbox-box{position:relative; max-width:min(90vw, 700px); max-height:85vh;}
+  .lightbox-box img{max-width:100%; max-height:85vh; border-radius:6px; background:#fff; display:block; margin:0 auto;}
+  .lightbox-caption{color:#fff; text-align:center; margin-top:14px; font-size:0.9rem;}
+  .lightbox-close{
+    position:absolute; top:-40px; right:0; background:none; border:none; color:#fff;
+    font-size:1.8rem; cursor:pointer; line-height:1;
+  }
+  .lightbox-nav{
+    position:absolute; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.15);
+    border:none; color:#fff; width:44px; height:44px; border-radius:50%; font-size:1.8rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+  }
+  .lightbox-nav:hover{background:rgba(255,255,255,0.3);}
+  .lightbox-prev{left:-20px;}
+  .lightbox-next{right:-20px;}
+  @media(max-width:600px){
+    .lightbox-prev{left:4px;} .lightbox-next{right:4px;}
+  }
+
+  /* ---------- quote ledger (signature element) ---------- */
+  .ledger{
+    position:sticky; top:96px;
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px 20px 26px; position:relative;
+  }
+  .ledger::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-9px; height:14px;
+    background-image: radial-gradient(circle at 8px 0, transparent 7px, var(--bg) 7px);
+    background-size:16px 14px; background-repeat:repeat-x;
+  }
+  .ledger h3{font-size:0.75rem; text-transform:uppercase; letter-spacing:.08em; color:var(--sage); margin-bottom:4px;}
+  .ledger .ledger-title{font-family:'Fraunces',serif; font-size:1.25rem; margin-bottom:14px;}
+  .ledger-empty{font-size:0.85rem; color:var(--text-muted); padding:18px 0;}
+  .ledger-item{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+    padding:9px 0; border-bottom:1px dashed var(--line); font-size:0.86rem;
+  }
+  .ledger-item .li-name{font-weight:500;}
+  .ledger-item .li-meta{color:var(--text-muted); font-size:0.78rem;}
+  .ledger-item .li-remove{background:none; border:none; color:var(--danger); font-size:0.75rem; text-decoration:underline; padding:2px 0;}
+  .ledger-total{display:flex; justify-content:space-between; align-items:baseline; margin-top:14px; padding-top:12px; border-top:2px solid var(--ink);}
+  .ledger-total .label{font-weight:600; color:var(--ink);}
+  .ledger-total .value{font-family:'IBM Plex Mono', monospace; font-size:1.1rem; font-weight:600; color:var(--ink);}
+  .ledger .btn{width:100%; justify-content:center; margin-top:16px;}
+  .ledger-note{font-size:0.72rem; color:var(--text-muted); margin-top:10px; text-align:center;}
+
+  .mobile-bar{
+    display:none; position:fixed; left:16px; right:16px; bottom:16px; z-index:45;
+    background:var(--ink); color:#fff; border-radius:999px; padding:14px 20px;
+    align-items:center; justify-content:space-between; box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  }
+  .mobile-bar span{font-family:'IBM Plex Mono', monospace; font-weight:600;}
+
+  /* ---------- modal ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(61,43,40,0.45); z-index:60;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal{
+    background:var(--paper); border-radius:var(--radius); max-width:460px; width:100%;
+    padding:28px; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    position:relative;
+  }
+  .modal h3{font-size:1.3rem; margin-bottom:4px;}
+  .modal p.sub{font-size:0.85rem; color:var(--text-muted); margin:0 0 18px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:0.8rem; font-weight:600; color:var(--ink); margin-bottom:5px;}
+  .field input, .field textarea{
+    width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+    font-family:inherit; font-size:0.92rem; background:var(--bg);
+  }
+  .field textarea{resize:vertical; min-height:70px;}
+  .modal-actions{display:flex; gap:10px; margin-top:18px;}
+  .modal-actions .btn{flex:1; justify-content:center;}
+  .close-x{position:absolute; top:16px; right:18px; background:none; border:none; font-size:1.3rem; color:var(--text-muted);}
+  .form-msg{font-size:0.82rem; margin-top:12px; padding:10px 12px; border-radius:8px;}
+  .form-msg.ok{background:rgba(181,103,125,0.12); color:var(--sage);}
+  .form-msg.err{background:rgba(181,72,75,0.1); color:var(--danger);}
+
+  @media (max-width: 880px){
+    .catalog-section .wrap{grid-template-columns:1fr;}
+    .ledger{position:static; margin-top:32px;}
+    .ledger::after{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a href="index.html" class="brand">
+      <img src="images/logo.png" alt="Vira Brindes" class="brand-logo">
+      <span class="brand-text">
+        <span class="display" id="cfg-site-name">Sua Loja</span>
+        <span class="tagline" id="cfg-tagline">produtos sob encomenda</span>
+      </span>
+    </a>
+    <nav class="main-nav">
+      <a href="index.html">Início</a>
+      <a href="produtos.html" class="current">Produtos</a>
+      <a href="index.html#como-funciona">Como funciona</a>
+      <a href="index.html#contato">Contato</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-head">
+  <div class="wrap">
+    <div class="breadcrumb"><a href="index.html">Início</a> / Produtos</div>
+    <h1>Catálogo completo</h1>
+    <p>Escolha os produtos e as quantidades que te interessam. Depois é só enviar sua lista — a gente prepara o orçamento certinho para você.</p>
+  </div>
+</section>
+
+<section class="catalog-section" id="catalogo">
+  <div class="wrap">
+    <div>
+      <div class="tabs" id="tabs"></div>
+      <div class="product-grid" id="product-grid"></div>
+    </div>
+
+    <aside class="ledger" id="ledger">
+      <h3>Sua lista</h3>
+      <div class="ledger-title">Itens selecionados</div>
+      <div id="ledger-items"><div class="ledger-empty">Nenhum item adicionado ainda. Escolha produtos ao lado para montar sua lista.</div></div>
+      <div class="ledger-total">
+        <span class="label">Total de itens</span>
+        <span class="value mono" id="ledger-total">0</span>
+      </div>
+      <button class="btn btn-primary" id="open-request-btn" disabled>Solicitar orçamento</button>
+      <div class="ledger-note">Sem preços fechados aqui — a gente te manda o orçamento certinho depois do pedido.</div>
+    </aside>
+  </div>
+</section>
+
+<div class="mobile-bar" id="mobile-bar">
+  <span id="mobile-bar-text">0 itens</span>
+  <a href="#ledger" class="btn btn-primary" style="padding:9px 16px;">Ver lista</a>
+</div>
+
+<footer id="contato">
+  <div class="wrap">
+    <span>© <span id="cfg-site-name-2">Sua Loja</span> — <span id="cfg-footer-note">edite estas informações no arquivo index.html</span></span>
+    <span id="cfg-contact">contato@sualoja.com.br · (11) 90000-0000</span>
+  </div>
+</footer>
+
+<!-- ============ modal: formulário de solicitação ============ -->
+<div class="overlay hidden" id="overlay">
+  <div class="modal">
+    <button class="close-x" id="close-modal">✕</button>
+    <h3>Finalizar orçamento</h3>
+    <p class="sub">Preencha seus dados. Vamos abrir seu e-mail com o pedido pronto para enviar.</p>
+    <div class="field">
+      <label for="f-nome">Nome *</label>
+      <input type="text" id="f-nome" placeholder="Seu nome completo">
+    </div>
+    <div class="field">
+      <label for="f-telefone">Telefone / WhatsApp *</label>
+      <input type="text" id="f-telefone" placeholder="(11) 90000-0000">
+    </div>
+    <div class="field">
+      <label for="f-email">Seu e-mail (opcional)</label>
+      <input type="email" id="f-email" placeholder="voce@email.com">
+    </div>
+    <div class="field">
+      <label for="f-obs">Observações</label>
+      <textarea id="f-obs" placeholder="Cores, prazos, detalhes do pedido..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="copy-btn" type="button">Copiar resumo</button>
+      <button class="btn btn-ghost" id="pdf-btn" type="button">Gerar PDF</button>
+    </div>
+    <button class="btn btn-primary" id="send-btn" type="button" style="width:100%; justify-content:center; margin-top:10px;">Enviar por e-mail</button>
+    <div id="form-msg"></div>
+  </div>
+</div>
+
+<!-- ============ lightbox: foto em tamanho grande ============ -->
+<div class="lightbox-overlay hidden" id="lightbox-overlay">
+  <div class="lightbox-box">
+    <button class="lightbox-close" id="lightbox-close">✕</button>
+    <button class="lightbox-nav lightbox-prev hidden" id="lightbox-prev">‹</button>
+    <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-nav lightbox-next hidden" id="lightbox-next">›</button>
+    <div class="lightbox-caption" id="lightbox-caption"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DO SITE — mesma configuração usada em index.html
+   ============================================================ */
+const CONFIG = {
+  siteName: "Vira Brindes",
+  tagline: "Personalize o seu sucesso",
+  ownerEmail: "virabrindes@outlook.com",   // <-- para onde os pedidos serão enviados (usado se o EmailJS abaixo não estiver configurado)
+  contactLine: "virabrindes@outlook.com · (11) 97014-7045",
+  footerNote: "feito sob encomenda, com carinho",
+  /* ============================================================
+     ENVIO DE E-MAIL CONFIÁVEL (opcional, via EmailJS)
+     Deixe os 3 campos abaixo em branco para usar o método simples
+     (abre o app de e-mail do cliente). Preencha os 3 com os dados
+     da sua conta gratuita em emailjs.com para o envio acontecer
+     automaticamente, sem depender do aparelho de quem compra.
+     Veja o passo a passo no LEIA-ME.md, seção "Envio de e-mail confiável".
+     ============================================================ */
+  emailjs: {
+    serviceId: "",   // cole aqui o Service ID (ex: "service_abc123")
+    templateId: "",  // cole aqui o Template ID (ex: "template_xyz789")
+    publicKey: ""    // cole aqui a Public Key (ex: "AbCdEfGhIjKlMnOp")
+  }
+};
+
+if(window.emailjs && CONFIG.emailjs.publicKey){
+  emailjs.init({ publicKey: CONFIG.emailjs.publicKey });
+}
+
+document.getElementById('cfg-site-name').textContent = CONFIG.siteName;
+document.getElementById('cfg-site-name-2').textContent = CONFIG.siteName;
+document.getElementById('cfg-tagline').textContent = CONFIG.tagline;
+document.getElementById('cfg-contact').textContent = CONFIG.contactLine;
+document.getElementById('cfg-footer-note').textContent = CONFIG.footerNote;
+document.title = "Produtos — " + CONFIG.siteName;
+
+/* ---------- estado ---------- */
+let PRODUCTS = [];
+let cart = {};
+const urlParams = new URLSearchParams(window.location.search);
+let activeCategory = urlParams.get('cat') || "Todos";
+
+
+function placeholderImg(text, seed){
+  const colors = ['#16323F','#C98A3B','#5B7B6B','#2E5361','#A96F27'];
+  const c = colors[seed % colors.length];
+  const initials = text.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+    <rect width="400" height="300" fill="${c}"/>
+    <text x="50%" y="53%" font-family="IBM Plex Sans, sans-serif" font-size="72" fill="#ffffff" fill-opacity="0.85" text-anchor="middle" dominant-baseline="middle">${initials}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
+async function loadProducts(){
+  try{
+    const res = await fetch('products.json', {cache:"no-store"});
+    if(!res.ok) throw new Error('não encontrado');
+    PRODUCTS = (await res.json()).filter(p => p.ativo !== false);
+  }catch(e){
+    document.getElementById('product-grid').innerHTML =
+      `<p style="color:var(--danger); font-size:0.9rem;">
+        Não foi possível carregar <code>products.json</code>. Se você abriu este arquivo
+        diretamente no navegador (duplo clique), o navegador bloqueia esse tipo de leitura local.
+        Publique a pasta em um site (ex: GitHub Pages, Netlify) ou rode um servidor local para testar.
+      </p>`;
+    return;
+  }
+  if(activeCategory !== "Todos" && !PRODUCTS.some(p => p.categoria === activeCategory)){
+    activeCategory = "Todos";
+  }
+  renderTabs();
+  renderGrid();
+}
+
+function renderTabs(){
+  const cats = ["Todos", ...new Set(PRODUCTS.map(p => p.categoria).filter(Boolean))];
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = "";
+  cats.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'tab' + (cat === activeCategory ? ' active' : '');
+    b.textContent = cat;
+    b.onclick = () => { activeCategory = cat; renderTabs(); renderGrid(); };
+    tabsEl.appendChild(b);
+  });
+}
+
+function renderGrid(){
+  const grid = document.getElementById('product-grid');
+  const list = activeCategory === "Todos" ? PRODUCTS : PRODUCTS.filter(p => p.categoria === activeCategory);
+  if(list.length === 0){
+    grid.innerHTML = `<p style="color:var(--text-muted);">Nenhum produto nesta categoria ainda.</p>`;
+    return;
+  }
+  grid.innerHTML = "";
+  list.forEach((p, i) => {
+    const qty = cart[p.id] ? cart[p.id].qty : 1;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="thumb"><img src="${p.imagem || placeholderImg(p.nome, i)}" alt="${p.nome}"></div>
+      <div class="body">
+        <span class="eyebrow">${p.categoria || ''}</span>
+        <h3>${p.nome}</h3>
+        <p class="desc">${p.descricao || ''}</p>
+        <div class="qty-row">
+          <div class="stepper">
+            <button data-act="dec">−</button>
+            <span class="qty-display">${qty}</span>
+            <button data-act="inc">+</button>
+          </div>
+          <button class="add-btn" data-act="add">Adicionar</button>
+        </div>
+      </div>`;
+    const stepperSpan = card.querySelector('.qty-display');
+    let localQty = qty;
+    card.querySelector('[data-act="dec"]').onclick = () => { if(localQty>1) localQty--; stepperSpan.textContent = localQty; };
+    card.querySelector('[data-act="inc"]').onclick = () => { localQty++; stepperSpan.textContent = localQty; };
+    card.querySelector('[data-act="add"]').onclick = () => { addToCart(p, localQty); };
+    card.querySelector('.thumb').onclick = () => {
+      const imgs = [p.imagemGrande || p.imagem, ...(Array.isArray(p.imagensExtras) ? p.imagensExtras : [])].filter(Boolean);
+      openLightbox(imgs.length ? imgs : [placeholderImg(p.nome, i)], p.nome);
+    };
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- lightbox ---------- */
+const lightboxOverlay = document.getElementById('lightbox-overlay');
+let lightboxImages = [];
+let lightboxIndex = 0;
+
+function showLightboxImage(){
+  document.getElementById('lightbox-img').src = lightboxImages[lightboxIndex];
+  const multi = lightboxImages.length > 1;
+  document.getElementById('lightbox-prev').classList.toggle('hidden', !multi);
+  document.getElementById('lightbox-next').classList.toggle('hidden', !multi);
+}
+function openLightbox(images, caption){
+  lightboxImages = Array.isArray(images) ? images : [images];
+  lightboxIndex = 0;
+  document.getElementById('lightbox-caption').textContent = caption || '';
+  showLightboxImage();
+  lightboxOverlay.classList.remove('hidden');
+}
+function closeLightbox(){ lightboxOverlay.classList.add('hidden'); }
+document.getElementById('lightbox-close').onclick = closeLightbox;
+document.getElementById('lightbox-prev').onclick = () => { lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length; showLightboxImage(); };
+document.getElementById('lightbox-next').onclick = () => { lightboxIndex = (lightboxIndex + 1) % lightboxImages.length; showLightboxImage(); };
+lightboxOverlay.addEventListener('click', (e) => { if(e.target === lightboxOverlay) closeLightbox(); });
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeLightbox(); });
+
+/* ---------- carrinho / ledger ---------- */
+function addToCart(product, qty){
+  cart[product.id] = { product, qty };
+  renderLedger();
+}
+function removeFromCart(id){
+  delete cart[id];
+  renderLedger();
+}
+function renderLedger(){
+  const itemsEl = document.getElementById('ledger-items');
+  const entries = Object.values(cart);
+  const totalEl = document.getElementById('ledger-total');
+  const openBtn = document.getElementById('open-request-btn');
+  const mobileBar = document.getElementById('mobile-bar');
+  const mobileText = document.getElementById('mobile-bar-text');
+
+  if(entries.length === 0){
+    itemsEl.innerHTML = `<div class="ledger-empty">Nenhum item adicionado ainda. Escolha produtos ao lado para montar sua lista.</div>`;
+    totalEl.textContent = '0';
+    openBtn.disabled = true;
+    mobileBar.style.display = 'none';
+    return;
+  }
+
+  itemsEl.innerHTML = "";
+  entries.forEach(({product, qty}) => {
+    const row = document.createElement('div');
+    row.className = 'ledger-item';
+    row.innerHTML = `
+      <div>
+        <div class="li-name">${product.nome}</div>
+        <div class="li-meta">Quantidade: ${qty}</div>
+      </div>
+      <div style="text-align:right;">
+        <button class="li-remove">remover</button>
+      </div>`;
+    row.querySelector('.li-remove').onclick = () => removeFromCart(product.id);
+    itemsEl.appendChild(row);
+  });
+  const totalItens = entries.reduce((a,e)=>a+e.qty,0);
+  totalEl.textContent = totalItens;
+  openBtn.disabled = false;
+  mobileBar.style.display = 'flex';
+  mobileText.textContent = totalItens + " itens na lista";
+}
+
+/* ---------- modal de solicitação ---------- */
+const overlay = document.getElementById('overlay');
+document.getElementById('open-request-btn').onclick = () => overlay.classList.remove('hidden');
+document.getElementById('close-modal').onclick = () => overlay.classList.add('hidden');
+overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.classList.add('hidden'); });
+
+function buildSummary(){
+  const entries = Object.values(cart);
+  let lines = entries.map(({product, qty}) => `- ${product.nome} | Quantidade: ${qty}`);
+  const nome = document.getElementById('f-nome').value.trim();
+  const telefone = document.getElementById('f-telefone').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const obs = document.getElementById('f-obs').value.trim();
+
+  let text = `Novo pedido de orçamento\n\n`;
+  text += `Cliente: ${nome}\nTelefone: ${telefone}\n`;
+  if(email) text += `E-mail: ${email}\n`;
+  text += `\nItens:\n${lines.join('\n')}\n`;
+  if(obs) text += `\nObservações: ${obs}\n`;
+  return {text, nome, telefone};
+}
+
+function showMsg(text, ok){
+  const el = document.getElementById('form-msg');
+  el.textContent = text;
+  el.className = 'form-msg ' + (ok ? 'ok' : 'err');
+}
+
+document.getElementById('send-btn').onclick = async () => {
+  const {text, nome, telefone} = buildSummary();
+  if(!nome || !telefone){
+    showMsg('Preencha nome e telefone antes de enviar.', false);
+    return;
+  }
+
+  const emailjsConfigured = window.emailjs && CONFIG.emailjs.serviceId && CONFIG.emailjs.templateId && CONFIG.emailjs.publicKey;
+
+  if(emailjsConfigured){
+    const entries = Object.values(cart);
+    const email = document.getElementById('f-email').value.trim();
+    const obs = document.getElementById('f-obs').value.trim();
+    const itensTexto = entries.map(({product, qty}) => `${product.nome} — Quantidade: ${qty}`).join('\n');
+
+    showMsg('Enviando pedido...', true);
+    document.getElementById('send-btn').disabled = true;
+    try{
+      await emailjs.send(CONFIG.emailjs.serviceId, CONFIG.emailjs.templateId, {
+        nome_cliente: nome,
+        telefone: telefone,
+        email_cliente: email || '(não informado)',
+        itens: itensTexto,
+        observacoes: obs || '(nenhuma)',
+        data_pedido: new Date().toLocaleString('pt-BR'),
+        to_email: CONFIG.ownerEmail
+      });
+      showMsg('Pedido enviado com sucesso! Em breve entraremos em contato.', true);
+    }catch(err){
+      console.error(err);
+      showMsg('Não foi possível enviar automaticamente. Tente "Copiar resumo" ou "Gerar PDF".', false);
+    }
+    document.getElementById('send-btn').disabled = false;
+  }else{
+    const subject = encodeURIComponent(`Pedido de orçamento — ${nome}`);
+    const body = encodeURIComponent(text);
+    window.location.href = `mailto:${CONFIG.ownerEmail}?subject=${subject}&body=${body}`;
+    showMsg('Abrindo seu aplicativo de e-mail com o pedido pronto para enviar...', true);
+  }
+};
+
+document.getElementById('copy-btn').onclick = async () => {
+  const {text, nome, telefone} = buildSummary();
+  if(!nome || !telefone){
+    showMsg('Preencha nome e telefone antes de copiar.', false);
+    return;
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    showMsg('Resumo copiado! Você já pode colar no WhatsApp ou e-mail.', true);
+  }catch(e){
+    showMsg('Não foi possível copiar automaticamente. Selecione o texto manualmente.', false);
+  }
+};
+
+document.getElementById('pdf-btn').onclick = () => {
+  const entries = Object.values(cart);
+  const nome = document.getElementById('f-nome').value.trim();
+  const telefone = document.getElementById('f-telefone').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const obs = document.getElementById('f-obs').value.trim();
+
+  if(!nome || !telefone){
+    showMsg('Preencha nome e telefone antes de gerar o PDF.', false);
+    return;
+  }
+
+  const dataHoje = new Date().toLocaleDateString('pt-BR');
+  const linhas = entries.map(({product, qty}) => `
+    <tr><td>${product.nome}</td><td style="text-align:center;">${qty}</td></tr>`).join('');
+
+  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Orçamento — ${nome}</title>
+  <style>
+    body{ font-family: Arial, Helvetica, sans-serif; color:#1a1a1a; padding:40px; max-width:720px; margin:0 auto; }
+    h1{ font-size:1.4rem; margin-bottom:2px; }
+    .sub{ color:#666; font-size:0.85rem; margin-bottom:28px; }
+    .info p{ margin:3px 0; font-size:0.95rem; }
+    table{ width:100%; border-collapse:collapse; margin-top:24px; }
+    th, td{ border:1px solid #ccc; padding:8px 10px; font-size:0.9rem; text-align:left; }
+    th{ background:#f0f0f0; }
+    .obs{ margin-top:20px; font-size:0.9rem; }
+    .footer{ margin-top:36px; font-size:0.8rem; color:#666; border-top:1px solid #ccc; padding-top:12px; }
+    @media print{ body{ padding:10px; } }
+  </style></head>
+  <body>
+    <h1>${CONFIG.siteName}</h1>
+    <div class="sub">Solicitação de orçamento — gerada em ${dataHoje}</div>
+    <div class="info">
+      <p><strong>Cliente:</strong> ${nome}</p>
+      <p><strong>Telefone:</strong> ${telefone}</p>
+      ${email ? `<p><strong>E-mail:</strong> ${email}</p>` : ''}
+    </div>
+    <table>
+      <thead><tr><th>Produto</th><th style="text-align:center;">Quantidade</th></tr></thead>
+      <tbody>${linhas}</tbody>
+    </table>
+    ${obs ? `<div class="obs"><strong>Observações:</strong> ${obs}</div>` : ''}
+    <div class="footer">Este documento é apenas uma lista de produtos solicitados — os valores serão confirmados por ${CONFIG.siteName} após contato pelo telefone informado.</div>
+    <script>window.onload = () => window.print();<\/script>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  if(!win){
+    showMsg('Não foi possível abrir a janela de impressão. Verifique se o navegador bloqueou pop-ups.', false);
+    return;
+  }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  showMsg('Abrindo o PDF — use "Salvar como PDF" na janela de impressão.', true);
+};
+
+loadProducts();
+</script>
+</body>
+</html>
