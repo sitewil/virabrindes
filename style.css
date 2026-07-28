@@ -1,0 +1,86 @@
+/* ============================================
+   CONFIGURAÇÃO RÁPIDA DE CORES E FONTES
+   Troque os valores abaixo para combinar com sua marca.
+   Esse arquivo é usado por todas as páginas do site.
+   ============================================ */
+:root{
+  --bg: #FBF5F3;
+  --paper: #FFFFFF;
+  --ink: #3D2B28;
+  --ink-soft: #5C433E;
+  --accent: #D98A4E;
+  --accent-dark: #B86B36;
+  --sage: #B5677D;
+  --line: #E8DAD5;
+  --text: #2A211F;
+  --text-muted: #7A6863;
+  --danger: #B5484B;
+  --radius: 10px;
+  --shadow: 0 8px 24px rgba(61,43,40,0.10);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'IBM Plex Sans', sans-serif;
+  line-height:1.5;
+}
+h1,h2,h3,.display{
+  font-family:'Fraunces', serif;
+  font-weight:600;
+  color:var(--ink);
+  margin:0;
+}
+.mono{ font-family:'IBM Plex Mono', monospace; }
+a{color:inherit;}
+img{max-width:100%; display:block;}
+button{font-family:inherit; cursor:pointer;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+.hidden{display:none !important;}
+
+/* ---------- header ---------- */
+.site-header{
+  position:sticky; top:0; z-index:40;
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.site-header .wrap{
+  display:flex; align-items:center; justify-content:space-between;
+  height:72px;
+}
+.brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand-logo{ width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.brand-text{ display:flex; align-items:baseline; gap:8px; }
+.brand .display{font-size:1.4rem;}
+.brand .tagline{font-size:0.75rem; color:var(--text-muted);}
+nav.main-nav{display:flex; align-items:center; gap:28px; font-size:0.95rem;}
+nav.main-nav a{text-decoration:none; color:var(--ink-soft); font-weight:500;}
+nav.main-nav a:hover{color:var(--accent-dark);}
+nav.main-nav a.current{color:var(--ink); border-bottom:2px solid var(--accent);}
+nav.main-nav .btn{padding:9px 18px; font-size:0.85rem;}
+
+/* ---------- buttons (usados em toda parte) ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:13px 22px; border-radius:999px; border:1px solid transparent;
+  font-weight:600; font-size:0.95rem; text-decoration:none;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.btn-primary{background:var(--accent); color:#fff;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-ghost{background:transparent; border-color:var(--ink); color:var(--ink);}
+.btn-ghost:hover{background:var(--ink); color:#fff;}
+.btn-ghost-light{background:transparent; border-color:rgba(255,255,255,0.55); color:#fff;}
+.btn-ghost-light:hover{background:rgba(255,255,255,0.15);}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line); padding:36px 0; background:var(--paper);}
+footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:0.85rem; color:var(--text-muted);}
+footer a{text-decoration:none; color:var(--ink-soft);}
+
+@media (max-width: 880px){
+  nav.main-nav a:not(.btn){display:none;}
+}
